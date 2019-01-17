@@ -1,27 +1,48 @@
 import React, { Component } from 'react';
 import './App.css';
-import data from './data'
 import Card from './components/card'
 
 class App extends Component {
 
-  constructor(props){
+  constructor(props) {
     super(props)
     this.state = {
-      wisdom: ''
+      songs: [],
+      hasQuote: false,
+      title: '',
+      quote: '',
+      tags: []
     }
   }
 
-  generateQuote = () => {
+  getRandomIntInclusive(max) {
+    const min = 0;
+    return Math.floor(Math.random() * (max + 1));
+  }
 
+  generateQuote = () => {
+    const randomIndex = this.getRandomIntInclusive(this.state.songs.length - 1)
+    const randomSong = this.state.songs[randomIndex]
+    this.setState({
+      hasQuote: true,
+      title: randomSong.title,
+      quote: randomSong.quote,
+      tags: randomSong.tags
+    })
   }
 
   componentDidMount() {
-    // set data to state 
+    fetch('http://localhost:3003/data')
+      .then(data => data.json())
+      .then(JSONdata => {
+        this.setState({
+          songs: JSONdata.data.songs
+        })
+      })
   }
 
   render() {
-    console.log("all the data", data)
+
     return (
       <div className="container-fluid">
         <div className="row navbar justify-content-end pb-5">
@@ -40,10 +61,15 @@ class App extends Component {
             <p className="pb-2">An app for randomly generating bits of Dolly Parton's sea of wisdom.</p>
             <button className="btn btn-danger btn-lg" onClick={this.generateQuote}>Press Me</button>
           </div>
-        </div> 
+        </div>
         <div className="row justify-content-center">
-          {this.generateQuote()}
-        {/* {this.state.wisdom ? <h1>{this.state.wisdom}</h1> : <Card></Card>} */}
+          {this.state.title
+            ? <Card
+              title={this.state.title}
+              quote={this.state.quote}
+              tags={this.state.tags}
+            />
+            : ''}
         </div>
       </div>
     );
